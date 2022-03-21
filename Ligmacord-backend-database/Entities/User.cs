@@ -2,11 +2,13 @@ namespace Ligmacord_backend_database.Entities;
 
 public record User
 {
-    public Guid id { get; init; }
-    public string username { get; init; }
-    public string email { get; init; }
-    public string password { get; init; }
+    public Guid Id { get; init; }
+    public string Username { get; init; }
+    public string Email { get; init; }
+    public string Password { get; init; }
     
-    public List<Guid> friends { get; init; }
-    public DateTimeOffset dateCreated { get; init; }
+    public List<Guid> Friends { get; init; }
+    
+    public List<Guid> Channels { get; init; }
+    public DateTimeOffset DateCreated { get; init; }
 }

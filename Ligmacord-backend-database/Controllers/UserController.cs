@@ -39,12 +39,13 @@ public class UserController : ControllerBase
     {
         var user = new User()
         {
-            id = Guid.NewGuid(),
-            username = createUserDto.username,
-            email = createUserDto.email,
-            password = createUserDto.password,
-            friends = new List<Guid>(),
-            dateCreated = DateTimeOffset.Now
+            Id = Guid.NewGuid(),
+            Username = createUserDto.username,
+            Email = createUserDto.email,
+            Password = createUserDto.password.GenerateHash(),
+            Channels = new List<Guid>(),
+            Friends = new List<Guid>(),
+            DateCreated = DateTimeOffset.Now
         };
         await _userRepository.AddUserAsync(user);
         return user.asDto();
@@ -66,7 +67,7 @@ public class UserController : ControllerBase
     public async IAsyncEnumerable<UserDto> GetFriends(Guid user_id)
     {
         User ownUser = await _userRepository.GetUserAsync(user_id);
-        List<Guid> friendsList = ownUser.friends;
+        List<Guid> friendsList = ownUser.Friends;
         for (int i = 0; i < friendsList.Count; i++)
         {
             yield return (await _userRepository.GetUserAsync(friendsList[i])).asDto();

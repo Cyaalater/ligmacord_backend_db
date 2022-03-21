@@ -23,6 +23,7 @@ builder.Services.AddSingleton<IMongoClient>(serviceProvider =>
     return new MongoClient(settings.ConnectionString);
 });
 builder.Services.AddSingleton<IUserRepository, MongoDbUserRepository>();
+builder.Services.AddSingleton<IChannelRepository, MongoDbChannelRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
