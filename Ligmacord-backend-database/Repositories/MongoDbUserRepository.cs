@@ -1,5 +1,9 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using Ligmacord_backend_database.Dtos;
 using Ligmacord_backend_database.Entities;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -25,6 +29,20 @@ public class MongoDbUserRepository : IUserRepository
         var filter = _filterBuilder.Where(user =>
             user.Password == _authenticateUser.Password.GenerateHash() && user.Username == _authenticateUser.UserName);
         var foundUser = _userCollection.Find(filter).SingleOrDefault();
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var tokenKey = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.Name, _authenticateUser.UserName)
+            }),
+            Expires = DateTime.Now.AddMinutes(10),
+            SigningCredentials =
+                new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
+        };
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return new Tokens() {Token = tokenHandler.WriteToken(token)};
         Console.WriteLine(_configuration["Jwt:Key"]);
         return new Tokens();
     }
