@@ -15,6 +15,12 @@ public class UserController : ControllerBase
         this._userRepository = userRepository;
     }
 
+    [HttpPost("Authenticate")]
+    public Tokens AuthenticateUser(AuthenticateUserDto _authenticateUser)
+    {
+        return _userRepository.Authenticate(_authenticateUser);
+    }
+
     [HttpGet]
     public async Task<IEnumerable<UserDto>> UsersGet()
     {

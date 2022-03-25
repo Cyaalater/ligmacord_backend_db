@@ -11,9 +11,9 @@ public static class Extensions
     {
         return new UserDto()
         {
-            id = user.Id,
-            username = user.Username,
-            dateCreated = user.DateCreated
+            Id = user.Id,
+            Username = user.Username,
+            DateCreated = user.DateCreated
         };
     }
 
@@ -27,13 +27,22 @@ public static class Extensions
             UsersId = channel.UsersId
         };
     }
+    
+    public static bool AuthenticatePassword(this User user, string inputPassword)
+    {
+        var hash = inputPassword.GenerateHash();
+        return hash == user.Password;
+    }
 
     public static string GenerateHash(this string password)
     {
+        byte[] bytePassword = Encoding.Unicode.GetBytes(password);
         MD5 encryptor = MD5.Create();
-        byte[] bytePassword = Encoding.Unicode.GetBytes(password); 
-        return MD5.HashData(bytePassword).ToString();
+        var result = encryptor.ComputeHash(bytePassword);
+        Console.WriteLine(Convert.ToBase64String(result));
+        return Convert.ToBase64String(result);
     }
+    
 
     public static bool ContainsUser(this Channel channel, Guid id)
     {

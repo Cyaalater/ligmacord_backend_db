@@ -11,11 +11,22 @@ public class MongoDbUserRepository : IUserRepository
     private const string CollectionName = "users";
     private readonly IMongoCollection<User> _userCollection;
     private readonly FilterDefinitionBuilder<User> _filterBuilder = new FilterDefinitionBuilder<User>();
-
-    public MongoDbUserRepository(IMongoClient mongoClient)
+    private readonly IConfiguration _configuration; 
+    
+    public MongoDbUserRepository(IMongoClient mongoClient, IConfiguration _configuration)
     {
+        this._configuration = _configuration;
         IMongoDatabase database = mongoClient.GetDatabase(DatabaseName);
         _userCollection = database.GetCollection<User>(CollectionName);
+    }
+
+    public Tokens Authenticate(AuthenticateUserDto _authenticateUser)
+    {
+        var filter = _filterBuilder.Where(user =>
+            user.Password == _authenticateUser.Password.GenerateHash() && user.Username == _authenticateUser.UserName);
+        var foundUser = _userCollection.Find(filter).SingleOrDefault();
+        Console.WriteLine(_configuration["Jwt:Key"]);
+        return new Tokens();
     }
 
     public async Task<User> GetUserAsync(Guid id)

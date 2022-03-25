@@ -2,6 +2,9 @@ using Ligmacord_backend_database.Repositories;
 using Ligmacord_backend_database.Settings;
 using MongoDB.Driver;
 using System.Configuration;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
@@ -22,8 +25,28 @@ builder.Services.AddSingleton<IMongoClient>(serviceProvider =>
         nameof(MongoDbSettings)).Get<MongoDbSettings>();
     return new MongoClient(settings.ConnectionString);
 });
+
 builder.Services.AddSingleton<IUserRepository, MongoDbUserRepository>();
 builder.Services.AddSingleton<IChannelRepository, MongoDbChannelRepository>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Issuer"],
+        IssuerSigningKey = new
+            SymmetricSecurityKey
+            (Encoding.UTF8.GetBytes
+                (builder.Configuration["Jwt:Key"]))
+    };
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -32,6 +55,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
 
 app.UseHttpsRedirection();
 

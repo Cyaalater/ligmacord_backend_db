@@ -5,6 +5,7 @@ namespace Ligmacord_backend_database.Repositories;
 
 public interface IUserRepository
 {
+    public Tokens Authenticate(AuthenticateUserDto _authenticateUser);
     public Task<User> GetUserAsync(Guid id);
     public Task<IEnumerable<User>> GetUsersAsync();
 
