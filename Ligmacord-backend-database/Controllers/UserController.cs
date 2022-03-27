@@ -1,10 +1,12 @@
 using Ligmacord_backend_database.Dtos;
 using Ligmacord_backend_database.Entities;
 using Ligmacord_backend_database.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ligmacord_backend_database.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("user")]
 public class UserController : ControllerBase
@@ -14,7 +16,9 @@ public class UserController : ControllerBase
     {
         this._userRepository = userRepository;
     }
-
+    
+    // User must authenticate before doing any action
+    [AllowAnonymous]
     [HttpPost("Authenticate")]
     public Tokens AuthenticateUser(AuthenticateUserDto _authenticateUser)
     {
@@ -24,6 +28,8 @@ public class UserController : ControllerBase
     [HttpGet]
     public async Task<IEnumerable<UserDto>> UsersGet()
     {
+        // Debug test for how to identify user from the token
+        Console.WriteLine(User.Identity.Name);
         var users = (await _userRepository.GetUsersAsync()).Select(user => user.asDto());
         return users;
     }
