@@ -12,17 +12,20 @@ namespace Ligmacord_backend_database.Controllers;
 public class UserController : ControllerBase
 {
     private IUserRepository _userRepository;
-    public UserController(IUserRepository userRepository)
+    private ISessionRepository _sessionRepository;
+    public UserController(IUserRepository _userRepository, ISessionRepository _sessionRepository)
     {
-        this._userRepository = userRepository;
+        this._userRepository = _userRepository;
+        this._sessionRepository = _sessionRepository;
     }
     
     // User must authenticate before doing any action
-    [AllowAnonymous]
     [HttpPost("Authenticate")]
-    public Tokens AuthenticateUser(AuthenticateUserDto _authenticateUser)
+    public async Task<Sessions> AuthenticateUser(AuthenticateUserDto _authenticateUser)
     {
-        return _userRepository.Authenticate(_authenticateUser);
+        var data = _userRepository.Authenticate(_authenticateUser);
+
+        return await _sessionRepository.AddSession(data);
     }
 
     [HttpGet]
@@ -66,6 +69,7 @@ public class UserController : ControllerBase
     [HttpPost("friends")]
     public async Task AddFriend(FriendAddDto friendAddDto)
     {
+        
         await _userRepository.AddFriendAsync(friendAddDto.OwnId, friendAddDto.FriendId);
     }
     
@@ -75,9 +79,10 @@ public class UserController : ControllerBase
         await _userRepository.RemoveFriendAsync(friendAddDto.OwnId, friendAddDto.FriendId);
     }
 
-    [HttpGet("friends/{user_id}")]
-    public async IAsyncEnumerable<UserDto> GetFriends(Guid user_id)
+    [HttpGet("friends")]
+    public async IAsyncEnumerable<UserDto> GetFriends()
     {
+        Guid user_id = await _sessionRepository.CheckSession(Guid.Parse(Request.Cookies["session_id"]));
         User ownUser = await _userRepository.GetUserAsync(user_id);
         List<Guid> friendsList = ownUser.Friends;
         for (int i = 0; i < friendsList.Count; i++)

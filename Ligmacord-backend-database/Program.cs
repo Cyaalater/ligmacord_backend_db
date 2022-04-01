@@ -28,6 +28,7 @@ builder.Services.AddSingleton<IMongoClient>(serviceProvider =>
 
 builder.Services.AddSingleton<IUserRepository, MongoDbUserRepository>();
 builder.Services.AddSingleton<IChannelRepository, MongoDbChannelRepository>();
+builder.Services.AddSingleton<ISessionRepository, MongoDbSessionRepository>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
@@ -59,7 +60,8 @@ if (app.Environment.IsDevelopment())
 
 
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
+
 app.UseRouting();
 
 app.UseAuthentication();

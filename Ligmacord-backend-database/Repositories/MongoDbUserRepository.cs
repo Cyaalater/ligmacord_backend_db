@@ -24,7 +24,7 @@ public class MongoDbUserRepository : IUserRepository
         _userCollection = database.GetCollection<User>(CollectionName);
     }
 
-    public Tokens Authenticate(AuthenticateUserDto _authenticateUser)
+    public Guid Authenticate(AuthenticateUserDto _authenticateUser)
     {
         var filter = _filterBuilder.Where(user =>
             user.Password == _authenticateUser.Password.GenerateHash() && user.Username == _authenticateUser.UserName);
@@ -33,9 +33,12 @@ public class MongoDbUserRepository : IUserRepository
         // Finish the function upon none users have same password and same username
         if (foundUser == null)
         {
-            return null;
+            return Guid.Empty;
         }
-        
+
+        return foundUser.Id;
+
+        /*
         // Jwt creation
         var tokenHandler = new JwtSecurityTokenHandler();
         // Get key from configuration
@@ -55,6 +58,7 @@ public class MongoDbUserRepository : IUserRepository
         };
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return new Tokens() {Token = tokenHandler.WriteToken(token)};
+        */
     }
 
     public async Task<User> GetUserAsync(Guid id)
